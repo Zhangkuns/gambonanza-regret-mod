@@ -1,0 +1,19 @@
+﻿# Build outputs
+bin/
+obj/
+publish/
+publish-selfcontained/
+
+# User/local files
+*.user
+*.suo
+.vs/
+
+# Runtime backup artifacts
+*.bak
+*.before_*
+backups/
+
+# OS files
+.DS_Store
+Thumbs.db
