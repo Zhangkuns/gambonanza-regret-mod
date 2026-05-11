@@ -59,6 +59,7 @@ namespace GambonanzaSaveManager
         NumericUpDown coins = new NumericUpDown();
         ToolTip tip = new ToolTip();
         ComboBox langBox = new ComboBox();
+        ComboBox boardCols = new ComboBox();
         string lastStamp = null;
         bool autoOn = false;
         int currentRows = 5, currentCols = 8;
@@ -103,12 +104,13 @@ namespace GambonanzaSaveManager
             var restore = new Button{Text="还原选中", Width=90};
             var refresh = new Button{Text="刷新", Width=70};
             langBox.DropDownStyle=ComboBoxStyle.DropDownList; langBox.Width=120; langBox.Items.AddRange(new object[]{"\u4e2d\u6587","English"}); langBox.SelectedIndex=0;
+            boardCols.DropDownStyle=ComboBoxStyle.DropDownList; boardCols.Width=80; boardCols.Items.AddRange(new object[]{"Auto","5","8"}); boardCols.SelectedIndex=0;
             nonCombat.Text="只看非战斗"; nonCombat.AutoSize=true; nonCombat.Padding=new Padding(8,7,0,0);
             coins.Maximum=999999; coins.Value=99; coins.Width=85;
             var setCoins = new Button{Text="改当前金币", Width=100};
             var deleteSelected = new Button{Text="删除选中备份", Width=110};
             var deleteAll = new Button{Text="删除全部备份", Width=110};
-            bar.Controls.AddRange(new Control[]{autoBtn,manual,restore,refresh,new Label{Text="\u8bed\u8a00",AutoSize=true,Padding=new Padding(12,7,0,0)},langBox,nonCombat,new Label{Text="\u91d1\u5e01",AutoSize=true,Padding=new Padding(12,7,0,0)},coins,setCoins,deleteSelected,deleteAll});
+            bar.Controls.AddRange(new Control[]{autoBtn,manual,restore,refresh,new Label{Text="\u8bed\u8a00",AutoSize=true,Padding=new Padding(12,7,0,0)},langBox,new Label{Text="Cols",AutoSize=true,Padding=new Padding(12,7,0,0)},boardCols,nonCombat,new Label{Text="\u91d1\u5e01",AutoSize=true,Padding=new Padding(12,7,0,0)},coins,setCoins,deleteSelected,deleteAll});
             root.Controls.Add(bar,0,1);
 
             var split = new SplitContainer{Dock=DockStyle.Fill, SplitterDistance=660};
@@ -147,7 +149,7 @@ namespace GambonanzaSaveManager
             applyStock.Click += delegate { ApplyStringList("PiecesInStock", Lines(stockBox.Text)); };
         }
 
-        void Hook(){ langBox.SelectedIndexChanged += delegate { ApplyLanguage(); RefreshList(); RenderCurrent(); }; autoBtn.Click += delegate { ToggleAuto(); }; backups.SelectedIndexChanged += delegate { var b=backups.SelectedItem as BackupItem; if(b!=null) RenderFile(b.Path,"备份: "+Path.GetFileName(b.Path)); }; nonCombat.CheckedChanged += delegate { RefreshList(); }; timer.Interval=2000; timer.Tick += delegate { AutoTick(); }; boardHost.Resize += delegate { ResizeBoardSquare(); }; savePath.Leave += delegate { RenderCurrent(); }; backupDir.Leave += delegate { RefreshList(); }; }
+        void Hook(){ langBox.SelectedIndexChanged += delegate { ApplyLanguage(); RefreshList(); RenderCurrent(); }; boardCols.SelectedIndexChanged += delegate { RefreshList(); RenderCurrent(); }; autoBtn.Click += delegate { ToggleAuto(); }; backups.SelectedIndexChanged += delegate { var b=backups.SelectedItem as BackupItem; if(b!=null) RenderFile(b.Path,"备份: "+Path.GetFileName(b.Path)); }; nonCombat.CheckedChanged += delegate { RefreshList(); }; timer.Interval=2000; timer.Tick += delegate { AutoTick(); }; boardHost.Resize += delegate { ResizeBoardSquare(); }; savePath.Leave += delegate { RenderCurrent(); }; backupDir.Leave += delegate { RefreshList(); }; }
         string Save { get { return savePath.Text.Trim(); } } string BakDir { get { return backupDir.Text.Trim(); } }
         static string DefaultSave(){ return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "LocalLow", "Blukulélé", "Gambonanza", "save.json"); }
         bool EN(){ return langBox!=null && langBox.SelectedIndex==1; }
@@ -198,9 +200,34 @@ namespace GambonanzaSaveManager
         void Trim(int keep){ foreach(var f in Directory.GetFiles(BakDir,"*.xml").Select(p=>new FileInfo(p)).OrderByDescending(f=>f.LastWriteTime).Skip(keep)){ try{f.Delete();}catch{} } }
         void RefreshList(bool selectFirst=true){ var selected=(backups.SelectedItem as BackupItem)?.Path; var list=new List<BackupItem>(); if(Directory.Exists(BakDir)) foreach(var f in Directory.GetFiles(BakDir,"*.xml").Select(p=>new FileInfo(p)).OrderByDescending(f=>f.LastWriteTime)){ var bi=Info(f.FullName); if(nonCombat.Checked && bi.State=="INGAME") continue; list.Add(bi); } backups.DataSource=null; backups.DataSource=list; if(selected!=null){ for(int i=0;i<list.Count;i++) if(list[i].Path==selected){ backups.SelectedIndex=i; break; } } if(selectFirst && backups.SelectedIndex<0 && list.Count>0) backups.SelectedIndex=0; Stat("备份数量: "+list.Count); }
         BackupItem Info(string p){ var fi=new FileInfo(p); var bi=new BackupItem{Path=p,Time=fi.LastWriteTime}; try{ var s=Read(p); bi.State=s.State; bi.Wave=s.Wave; bi.Coins=s.Coins; bi.White=s.White; bi.Black=s.Black; }catch{ bi.State="读取失败";} return bi; }
-        Snapshot Read(string p){ var doc=LoadDoc(p); var data=doc.SelectSingleNode("/Data"); if(data==null) throw new Exception("不是Data XML"); var s=new Snapshot(); s.State=Txt(data,"CurrentRunState"); s.Wave=Txt(data,"CurrentWave"); s.Coins=Txt(data,"Coins"); s.Difficulty=Txt(data,"CurrentDifficulty"); s.Run=Txt(data,"RunInProgress"); var ns=doc.SelectNodes("/Data/PiecesOnBoard/string"); if(ns!=null){ int count=ns.Count; var dims=InferDims(count); s.Rows=dims.Item1; s.Cols=dims.Item2; s.Pieces=Enumerable.Repeat("", Math.Max(1,s.Rows*s.Cols)).ToArray(); for(int i=0;i<Math.Min(ns.Count,s.Pieces.Length);i++){ s.Pieces[i]=ns[i].InnerText; } } var gs=doc.SelectNodes("/Data/CurrentGambits/string"); if(gs!=null) foreach(XmlNode n in gs) if(!string.IsNullOrWhiteSpace(n.InnerText)) s.Gambits.Add(n.InnerText); var st=doc.SelectNodes("/Data/PiecesInStock/string"); if(st!=null) foreach(XmlNode n in st) if(!string.IsNullOrWhiteSpace(n.InnerText)) s.Stock.Add(n.InnerText); return s; }
+        Snapshot Read(string p){ var doc=LoadDoc(p); var data=doc.SelectSingleNode("/Data"); if(data==null) throw new Exception("不是Data XML"); var s=new Snapshot(); s.State=Txt(data,"CurrentRunState"); s.Wave=Txt(data,"CurrentWave"); s.Coins=Txt(data,"Coins"); s.Difficulty=Txt(data,"CurrentDifficulty"); s.Run=Txt(data,"RunInProgress"); var ns=doc.SelectNodes("/Data/PiecesOnBoard/string"); if(ns!=null){
+                int count=ns.Count;
+                int storageRows=5;
+                int storageCols=(int)Math.Ceiling((double)count/storageRows);
+                int visibleCols=InferVisibleCols(count, s.Wave, storageCols);
+                s.Rows=storageRows; s.Cols=visibleCols;
+                s.Pieces=Enumerable.Repeat("", Math.Max(1,s.Rows*s.Cols)).ToArray();
+                for(int r=0;r<s.Rows;r++){
+                    for(int c=0;c<s.Cols;c++){
+                        int src=r*storageCols+c;
+                        int dst=r*s.Cols+c;
+                        if(src>=0 && src<ns.Count && dst>=0 && dst<s.Pieces.Length) s.Pieces[dst]=ns[src].InnerText;
+                    }
+                }
+            } var gs=doc.SelectNodes("/Data/CurrentGambits/string"); if(gs!=null) foreach(XmlNode n in gs) if(!string.IsNullOrWhiteSpace(n.InnerText)) s.Gambits.Add(n.InnerText); var st=doc.SelectNodes("/Data/PiecesInStock/string"); if(st!=null) foreach(XmlNode n in st) if(!string.IsNullOrWhiteSpace(n.InnerText)) s.Stock.Add(n.InnerText); return s; }
         static string Txt(XmlNode data,string name){ var n=data.SelectSingleNode(name); return n==null?"?":n.InnerText; }
-        Tuple<int,int> InferDims(int count){ if(count<=0) return Tuple.Create(5,8); if(count==40) return Tuple.Create(5,8); if(count%8==0) return Tuple.Create(count/8,8); if(count%7==0) return Tuple.Create(count/7,7); if(count%6==0) return Tuple.Create(count/6,6); if(count%5==0) return Tuple.Create(count/5,5); int cols=(int)Math.Ceiling(Math.Sqrt(count)); int rows=(int)Math.Ceiling((double)count/cols); return Tuple.Create(rows,cols); }
+        int InferVisibleCols(int count, string waveText, int storageCols){
+            int forcedCols=0;
+            if(boardCols!=null && boardCols.SelectedItem!=null) int.TryParse(boardCols.SelectedItem.ToString(), out forcedCols);
+            if(forcedCols>0) return Math.Max(1, Math.Min(forcedCols, storageCols));
+
+            int wave=1;
+            int.TryParse(waveText, out wave);
+            // Gambonanza appears to unlock one additional visible column every 5 waves.
+            // Storage remains at the max width, but the in-game board only shows unlocked columns.
+            int visible = 5 + Math.Max(0, (wave-1) / 5);
+            return Math.Max(1, Math.Min(visible, storageCols));
+        }
         void RenderCurrent(){ if(File.Exists(Save)) RenderFile(Save,"当前存档"); else Clear("未选择有效 save.json"); }
         void BuildBoard(int rows,int cols){
             currentRows=rows; currentCols=cols;
