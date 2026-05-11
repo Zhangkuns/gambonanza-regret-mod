@@ -1,7 +1,4 @@
 ﻿# Build outputs
-bin/
-obj/
-publish/
 publish-selfcontained/
 
 # User/local files
@@ -17,3 +14,4 @@ backups/
 # OS files
 .DS_Store
 Thumbs.db
+

@@ -1,0 +1,15 @@
+C:\Users\zks\Desktop\GambonanzaSaveManager\bin\Release\net6.0-windows\win-x64\GambonanzaSaveManager.exe
+C:\Users\zks\Desktop\GambonanzaSaveManager\bin\Release\net6.0-windows\win-x64\GambonanzaSaveManager.deps.json
+C:\Users\zks\Desktop\GambonanzaSaveManager\bin\Release\net6.0-windows\win-x64\GambonanzaSaveManager.runtimeconfig.json
+C:\Users\zks\Desktop\GambonanzaSaveManager\bin\Release\net6.0-windows\win-x64\GambonanzaSaveManager.dll
+C:\Users\zks\Desktop\GambonanzaSaveManager\bin\Release\net6.0-windows\win-x64\GambonanzaSaveManager.pdb
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\GambonanzaSaveManager.csproj.AssemblyReference.cache
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\GambonanzaSaveManager.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\GambonanzaSaveManager.AssemblyInfoInputs.cache
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\GambonanzaSaveManager.AssemblyInfo.cs
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\GambonanzaSaveManager.csproj.CoreCompileInputs.cache
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\GambonanzaSaveManager.dll
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\refint\GambonanzaSaveManager.dll
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\GambonanzaSaveManager.pdb
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\GambonanzaSaveManager.genruntimeconfig.cache
+C:\Users\zks\Desktop\GambonanzaSaveManager\obj\Release\net6.0-windows\win-x64\ref\GambonanzaSaveManager.dll

@@ -82,34 +82,7 @@ GambonanzaSaveManager/
 
 Generated build folders such as `bin/`, `obj/`, and `publish/` are ignored by Git.
 
-## GitHub SSH Setup
-
-If this is your first time pushing to GitHub over SSH, make sure your SSH public key is added to your GitHub account.
-
-Check for an SSH public key:
-
-```powershell
-Get-ChildItem $env:USERPROFILE\.ssh\*.pub
-```
-
-Show your public key:
-
-```powershell
-Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub
-```
-
-Then add it in GitHub:
-
-```text
-GitHub → Settings → SSH and GPG keys → New SSH key
-```
-
-Test SSH access:
-
-```powershell
-ssh -T git@github.com
-```
-
 ## License
 
 No license has been selected yet. Add a license file if you plan to publish or share the project publicly.
+
